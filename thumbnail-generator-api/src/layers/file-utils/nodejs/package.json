@@ -1,0 +1,23 @@
+{
+	"name": "nodejs",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@aws-sdk/client-s3": "^3.163.0",
+		"aws-sdk": "^2.1208.0",
+		"file-type": "^14.6.2",
+		"sharp": "^0.30.7",
+		"uuid": "^8.1.0"
+	},
+	"devDependencies": {
+		"@types/sharp": "^0.30.5",
+		"@types/uuid": "^8.3.4"
+	}
+}
