@@ -1,0 +1,154 @@
+openapi: 3.0.0
+info:
+  title: Sinapsis Thumnbnail API
+  description: HTTP API to generate thumbnails from png/jpeg image
+  version: 1.0.0
+  contact:
+    email: "ederfduran@gmail.com"
+servers:
+  - url: "https://3g74krwlud.execute-api.us-east-1.amazonaws.com/{basePath}"
+    variables:
+      basePath:
+        default: "live"
+
+paths:
+  /api/v1/thumbnail-gen:
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - CORS
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: {}
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+              method.response.header.Access-Control-Allow-Methods: "'*'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            responseTemplates:
+              application/json: |
+                {}
+    post:
+      summary: Create thumbnail generation request
+      description: Create thumbnail generation request
+      responses:
+        "200":
+          description: thumbnail generation request created
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: POST
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${createThumbnailRequestFunction.Arn}/invocations"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
+  /api/v1/thumbnail-gen/status/{requestId}:
+    parameters:
+      - $ref: "#/components/parameters/requestId"
+
+    get:
+      summary: Get request status information
+      description: Get request status information
+      responses:
+        "200":
+          description: Thumbnail request status
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: GET
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${readThumbnailRequestStatusFunction.Arn}/invocations"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
+x-amazon-apigateway-binary-media-types:
+  - "image/png"
+  - "image/jpeg"
+
+x-amazon-apigateway-cors:
+  allowMethods:
+    - "GET"
+    - "OPTIONS"
+    - "POST"
+
+  allowHeaders:
+    - "authorization"
+    - "content-type"
+    - "x-amz-date"
+  allowCredentials: false
+  allowOrigins:
+    - "*"
+
+components:
+  parameters:
+    requestId:
+      name: requestId
+      description: Unique identifier for thumbnail request
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    Empty:
+      title: "Empty Schema"
+      type: "object"
+
+    ThumbnailRequest:
+      type: object
+      properties:
+        requestId:
+          type: string
+        storageLocation:
+          type: string
+        requestStatus:
+          type: string
+        created:
+          type: boolean
+        modified:
+          type: string

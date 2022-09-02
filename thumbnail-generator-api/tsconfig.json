@@ -1,0 +1,38 @@
+{
+	"compilerOptions": {
+		"target": "ES2018",
+		"module": "commonjs",
+		"lib": ["es2018"],
+		"declaration": true,
+		"strict": true,
+		"noImplicitAny": true,
+		"strictNullChecks": true,
+		"noImplicitThis": true,
+		"alwaysStrict": true,
+		"noUnusedLocals": false,
+		"noUnusedParameters": false,
+		"noImplicitReturns": true,
+		"esModuleInterop": true,
+		"noFallthroughCasesInSwitch": false,
+		"inlineSourceMap": true,
+		"inlineSources": true,
+		"experimentalDecorators": true,
+		"strictPropertyInitialization": false,
+		"typeRoots": ["./node_modules/@types"],
+		"baseUrl": "./",
+		"paths": {
+			"/opt/nodejs/thumbnail-request-dao": [
+				"src/layers/common/nodejs/thumbnail-request-dao"
+			],
+			"/opt/nodejs/thumbnail-request": [
+				"src/layers/common/nodejs/thumbnail-request"
+			],
+			"/opt/nodejs/responses": ["src/layers/common/nodejs/responses"],
+			"/opt/nodejs/file-utils": ["src/layers/file-utils/nodejs/file-utils"],
+			"/opt/nodejs/exception-handler": [
+				"src/layers/common/nodejs/exception-handler"
+			]
+		}
+	},
+	"exclude": ["node_modules", "cdk.out"]
+}

@@ -1,9 +1,11 @@
 # PoC: Thumbnail Generator API
 
 ## Goal
+
 Build a simple API that generates thumbnails from a source image
 
 ## Requirements
+
 - The API should provide at least 1 endpoint where the user will be able to POST the original image
 - The API must **ONLY** accept PNG and JPEG files
 - The API must reject input file bigger than **5mb**
@@ -15,6 +17,7 @@ Build a simple API that generates thumbnails from a source image
 ## Grading Guidelines
 
 ### MVP (40 points)
+
 - Every requirement is met
 - The solution runs on our enviroment
 - Tech Stack: Node.js >=8 / Python 3
@@ -23,7 +26,8 @@ Build a simple API that generates thumbnails from a source image
 - The code should be clear and easy to read / debug
 
 ### Nice moves (5 points each)
-- It includes **RAML** or **Swagger** documentation 
+
+- It includes **RAML** or **Swagger** documentation
 - It includes configuration files / scripts for deploying it on **AWS** or **GCP**
 - It's serverless! (either **AWS Lambda + API Gateway** or **GCP Cloud Functions**)
 - It relies on **Serverless Framework** or **SAM**
@@ -35,6 +39,28 @@ Build a simple API that generates thumbnails from a source image
 - It has an auth implementation (recommended: Auth0)
 
 ### Wait, WHAT?! (10 points each)
+
 - It includes a configuration file / script to setup a CI/CD process on AWS or GCP
 - It includes three different kinds of tests (unit, integration and performance)
 
+## Special requirements
+
+In order to use `aws-cdk-lib/aws-lambda-nodejs` for bundling and transpiling you might need the following:
+
+- Having docker running on your machine
+- Enable experimental features on docker and restart docker daemon
+- Logout from ECR in case you have your credentials saved. `docker logout public.ecr.aws`
+
+## Api Design
+
+- `POST /api/v1/thumbnail-gen`
+- `GET /api/v1/thumbnail-gen/status/:requestId`
+- `GET /api/v1/thumbnail-gen/download/:requestId`
+
+## Backend Architecture
+
+![alt text](docs/Thumbnail-gen.png)
+
+## Persistence layer
+
+For pesist the data we are going to use dynamo db with a table called thumbnail requests where partition key will be a request id generated. Besides that we plan to storage information of request status, last download and instert date.
