@@ -1,16 +1,33 @@
-import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
-import { IThumbnailRequest } from "/opt/nodejs/thumbnail-request";
+import {
+	APIGatewayProxyEventV2,
+	APIGatewayProxyResultV2,
+	APIGatewayProxyEventPathParameters,
+} from "aws-lambda";
+import exceptionHandler from "/opt/nodejs/exception-handler";
 import { ThumbnailRequestDAO } from "/opt/nodejs/thumbnail-request-dao";
+import Responses from "/opt/nodejs/responses";
+
+interface IThumbnailRequestPathParams
+	extends APIGatewayProxyEventPathParameters {
+	requestId: string;
+}
 
 const thumbnailRequestDAO = new ThumbnailRequestDAO();
 
 export async function handler(
 	event: APIGatewayProxyEventV2
 ): Promise<APIGatewayProxyResultV2> {
-	console.log("event 👉", event);
-
-	return {
-		body: JSON.stringify({ message: "Successful lambda invocation" }),
-		statusCode: 200,
-	};
+	try {
+		const { requestId } = event.pathParameters as IThumbnailRequestPathParams;
+		const thumbnailReq = await thumbnailRequestDAO.getThumbnailRequest(
+			requestId
+		);
+		console.log(thumbnailReq);
+		return Responses.OK({
+			thumbnailReq,
+		});
+	} catch (e) {
+		console.log(e);
+		return exceptionHandler(e!);
+	}
 }

@@ -53,9 +53,8 @@ In order to use `aws-cdk-lib/aws-lambda-nodejs` for bundling and transpiling you
 
 ## Api Design
 
-- `POST /api/v1/thumbnail-gen`
-- `GET /api/v1/thumbnail-gen/status/:requestId`
-- `GET /api/v1/thumbnail-gen/download/:requestId`
+- `POST /api/v1/thumbnail/generate`
+- `GET /api/v1/thumbnail/:requestId`
 
 ## Backend Architecture
 

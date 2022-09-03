@@ -81,7 +81,7 @@ export async function handler(
 		};
 		await thumbnailRequestDAO.createThumbnailRequest(thumbnailRequest);
 		await sendMessage(JSON.stringify(thumbnailRequest));
-		return Responses.OK({
+		return Responses.CREATED({
 			thumbnailRequest,
 		});
 	} catch (e) {

@@ -12,7 +12,7 @@ servers:
         default: "live"
 
 paths:
-  /api/v1/thumbnail-gen:
+  /api/v1/thumbnail/generate:
     options:
       summary: CORS support
       description: |
@@ -54,7 +54,7 @@ paths:
       summary: Create thumbnail generation request
       description: Create thumbnail generation request
       responses:
-        "200":
+        "201":
           description: thumbnail generation request created
           headers:
             Access-Control-Allow-Origin:
@@ -78,11 +78,11 @@ paths:
           Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${createThumbnailRequestFunction.Arn}/invocations"
         responses:
           default:
-            statusCode: "200"
+            statusCode: "201"
             responseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
 
-  /api/v1/thumbnail-gen/status/{requestId}:
+  /api/v1/thumbnail/{requestId}:
     parameters:
       - $ref: "#/components/parameters/requestId"
 
@@ -91,14 +91,18 @@ paths:
       description: Get request status information
       responses:
         "200":
-          description: Thumbnail request status
+          description: Read thumbnail request
           headers:
             Access-Control-Allow-Origin:
               schema:
                 type: string
+          # content:
+          #   application/json:
+          #     schema:
+          #       $ref: "#/components/schemas/ThumbnailRequest"
       x-amazon-apigateway-integration:
         type: "aws_proxy"
-        httpMethod: GET
+        httpMethod: POST
         uri:
           Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${readThumbnailRequestStatusFunction.Arn}/invocations"
         responses:

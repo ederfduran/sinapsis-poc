@@ -1,4 +1,5 @@
 import * as cdk from "aws-cdk-lib";
+import * as iam from "aws-cdk-lib/aws-iam";
 import {
 	Bucket,
 	BucketEncryption,
@@ -13,12 +14,26 @@ export class S3BucketStack extends cdk.Stack {
 		super(scope, id, props);
 		this.thumbnailBucket = new Bucket(scope, "sinapsis-thumbnail-bucket", {
 			bucketName: "sinapsis-thumbnail-bucket",
-			blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+			blockPublicAccess: {
+				blockPublicAcls: true,
+				ignorePublicAcls: true,
+				blockPublicPolicy: false,
+				restrictPublicBuckets: false,
+			},
 			encryption: BucketEncryption.S3_MANAGED,
 			enforceSSL: false,
 			versioned: false,
 			// Not recomended from prod env
 			removalPolicy: cdk.RemovalPolicy.DESTROY,
 		});
+
+		this.thumbnailBucket.addToResourcePolicy(
+			new iam.PolicyStatement({
+				effect: iam.Effect.ALLOW,
+				principals: [new iam.StarPrincipal()],
+				actions: ["s3:GetObject"],
+				resources: [`${this.thumbnailBucket.bucketArn}/thumbnails/*`],
+			})
+		);
 	}
 }

@@ -32,7 +32,7 @@ export class ThumbnailRequestDAO {
 			TableName: this._tableName,
 		};
 		const { Item } = await this._dynamoClient.getItem(queryThumbnailRequest);
-		return Item;
+		return Item ? unmarshall(Item) : null;
 	}
 
 	public async updateThumbnailRequest(

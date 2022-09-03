@@ -35,13 +35,13 @@ export class LambdaStack {
 	) {
 		this.stack = scope;
 		const commonLayer = new LayerVersion(this.stack, "common-dao-layer", {
-			compatibleRuntimes: [Runtime.NODEJS_14_X],
+			compatibleRuntimes: [Runtime.NODEJS_14_X, Runtime.NODEJS_12_X],
 			code: Code.fromAsset(path.join(__dirname, "/../../src/layers/common")),
 			description: "Manage operations in database",
 		});
 
 		const fileUtilsLayer = new LayerVersion(this.stack, "file-utils-layer", {
-			compatibleRuntimes: [Runtime.NODEJS_14_X],
+			compatibleRuntimes: [Runtime.NODEJS_14_X, Runtime.NODEJS_12_X],
 			code: Code.fromAsset(
 				path.join(__dirname, "/../../src/layers/file-utils")
 			),
@@ -66,23 +66,17 @@ export class LambdaStack {
 		thumbnailBucket: Bucket,
 		thumbnailQueue: Queue
 	) {
-		this.thumbnailGenerator = new NodejsFunction(
+		// Configure path to Dockerfile
+		const dockerfile = path.join(__dirname, "/../..");
+
+		// Create AWS Lambda function and push image to ECR
+		this.thumbnailGenerator = new DockerImageFunction(
 			this.stack,
 			"thumbnailGeneratorFunction",
 			{
+				code: DockerImageCode.fromImageAsset(dockerfile),
 				functionName: "thumbnailGeneratorFunction",
-				entry: path.join(
-					__dirname,
-					"/../../src/lambdas/async/thumbnail-generator/index.js"
-				),
-				handler: "handler",
-				runtime: Runtime.NODEJS_12_X,
-				layers: this.layers,
 				memorySize: 3008,
-				bundling: {
-					minify: true,
-					externalModules: ["aws-sdk"],
-				},
 				environment: {
 					QUEUE_URL: thumbnailQueue.queueUrl,
 					BUCKET_NAME: thumbnailBucket.bucketName,
@@ -91,14 +85,6 @@ export class LambdaStack {
 				},
 			}
 		);
-
-		// Configure path to Dockerfile
-		const dockerfile = path.join(__dirname, "/../..");
-
-		// Create AWS Lambda function and push image to ECR
-		new DockerImageFunction(this.stack, "thumbnailGeneratorFunction", {
-			code: DockerImageCode.fromImageAsset(dockerfile),
-		});
 
 		// Update request status
 		this.thumbnailGenerator.addToRolePolicy(
@@ -110,8 +96,11 @@ export class LambdaStack {
 		// put results on s3
 		this.thumbnailGenerator.addToRolePolicy(
 			new PolicyStatement({
-				actions: ["s3:PutObject"],
-				resources: [thumbnailBucket.bucketArn],
+				actions: ["s3:PutObject", "s3:GetObject"],
+				resources: [
+					thumbnailBucket.bucketArn,
+					`${thumbnailBucket.bucketArn}/*`,
+				],
 			})
 		);
 
@@ -119,7 +108,7 @@ export class LambdaStack {
 		this.thumbnailGenerator.addEventSource(
 			new SqsEventSource(thumbnailQueue, {
 				batchSize: 10, // default
-				maxBatchingWindow: cdk.Duration.minutes(5),
+				maxBatchingWindow: cdk.Duration.seconds(1),
 				reportBatchItemFailures: true, // default to false
 			})
 		);
