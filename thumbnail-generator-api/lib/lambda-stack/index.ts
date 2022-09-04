@@ -8,6 +8,7 @@ import {
 	LayerVersion,
 	DockerImageFunction,
 	DockerImageCode,
+	CfnFunction,
 } from "aws-cdk-lib/aws-lambda";
 import { Bucket } from "aws-cdk-lib/aws-s3";
 import { Queue } from "aws-cdk-lib/aws-sqs";
@@ -27,6 +28,7 @@ export class LambdaStack {
 	thumbnailGenerator: LambdaFunction;
 	layers: LayerVersion[];
 	stack: Construct;
+	authorizer: NodejsFunction;
 	constructor(
 		scope: Construct,
 		thumbnailRequestTable: Table,
@@ -59,6 +61,7 @@ export class LambdaStack {
 			thumbnailBucket,
 			thumbnailQueue
 		);
+		this.createAuthorizer();
 	}
 
 	private createThumbnailGeneratorLambda(
@@ -163,5 +166,23 @@ export class LambdaStack {
 			thumbnailRequestTable,
 			thumbnailBucket
 		).grantTableRead();
+	}
+
+	private createAuthorizer() {
+		const authorizerId = "auth0AuthorizerFunction";
+		this.authorizer = new NodejsFunction(this.stack, authorizerId, {
+			functionName: authorizerId,
+			entry: path.join(__dirname, "/../../src/auth/index.js"),
+			runtime: Runtime.NODEJS_12_X,
+			handler: "handler",
+			environment: {
+				JWKS_URI: "https://dev-4pls1z4n.us.auth0.com/.well-known/jwks.json",
+				AUDIENCE: "https://thumbnails",
+				TOKEN_ISSUER: "https://dev-4pls1z4n.us.auth0.com/",
+			},
+		});
+		// Override logical Id to reference correctly on OpenAPI
+		const cfnLambda = this.authorizer.node.defaultChild as CfnFunction;
+		cfnLambda.overrideLogicalId(authorizerId);
 	}
 }

@@ -70,6 +70,8 @@ paths:
             application/json:
               schema:
                 type: string
+      security:
+        - Auth0Authorizer: []
 
       x-amazon-apigateway-integration:
         type: "aws_proxy"
@@ -100,6 +102,9 @@ paths:
           #   application/json:
           #     schema:
           #       $ref: "#/components/schemas/ThumbnailRequest"
+      security:
+        - Auth0Authorizer: []
+
       x-amazon-apigateway-integration:
         type: "aws_proxy"
         httpMethod: POST
@@ -122,7 +127,7 @@ x-amazon-apigateway-cors:
     - "POST"
 
   allowHeaders:
-    - "authorization"
+    - "Authorization"
     - "content-type"
     - "x-amz-date"
   allowCredentials: false
@@ -156,3 +161,17 @@ components:
           type: boolean
         modified:
           type: string
+
+  securitySchemes:
+    Auth0Authorizer:
+      description: Authorizer to secure endpoints using auth0
+      type: apiKey
+      name: Authorization
+      in: header
+      x-amazon-apigateway-authtype: custom
+      x-amazon-apigateway-authorizer:
+        authorizerUri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${auth0AuthorizerFunction.Arn}/invocations"
+        authorizerResultTtlInSeconds: 300
+        type: token
+        IdentityValidationExpression: ^Bearer [-0-9a-zA-z\.]*$
