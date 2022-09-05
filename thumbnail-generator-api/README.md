@@ -27,6 +27,13 @@ In order to use `aws-cdk-lib/aws-lambda-nodejs` for bundling and transpiling you
 - Enable experimental features on docker and restart docker daemon
 - Logout from ECR in case you have your credentials saved. `docker logout public.ecr.aws`
 
+## Useful commands
+
+- `npm i`
+- `npx cdk synth`
+- `npx cdk deploy --all`
+- `npm run test`
+
 ## Api Design
 
 - `POST /api/v1/thumbnail/generate`
