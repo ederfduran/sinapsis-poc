@@ -1,6 +1,6 @@
 import {
-	APIGatewayProxyEventV2,
-	APIGatewayProxyResultV2,
+	APIGatewayProxyEvent,
+	APIGatewayProxyResult,
 	APIGatewayProxyEventPathParameters,
 } from "aws-lambda";
 import exceptionHandler from "/opt/nodejs/exception-handler";
@@ -12,19 +12,19 @@ interface IThumbnailRequestPathParams
 	requestId: string;
 }
 
-const thumbnailRequestDAO = new ThumbnailRequestDAO();
+export const thumbnailRequestDAO = new ThumbnailRequestDAO();
 
 export async function handler(
-	event: APIGatewayProxyEventV2
-): Promise<APIGatewayProxyResultV2> {
+	event: APIGatewayProxyEvent
+): Promise<APIGatewayProxyResult> {
 	try {
 		const { requestId } = event.pathParameters as IThumbnailRequestPathParams;
-		const thumbnailReq = await thumbnailRequestDAO.getThumbnailRequest(
+		const thumbnailRequest = await thumbnailRequestDAO.getThumbnailRequest(
 			requestId
 		);
-		console.log(thumbnailReq);
+		console.log(thumbnailRequest);
 		return Responses.OK({
-			thumbnailReq,
+			thumbnailRequest,
 		});
 	} catch (e) {
 		console.log(e);
