@@ -9,8 +9,12 @@ import { SqsStack } from "./sqs-stack";
 export class ThumbnailGeneratorApiStack extends cdk.Stack {
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
 		super(scope, id, props);
-		const dbStack = new DbStack(this, "dbStack", { stackName: "dbStack" });
+		const dbStack = new DbStack(this, "dbStack", {
+			...props,
+			stackName: "dbStack",
+		});
 		const s3Stack = new S3BucketStack(this, "s3Stack", {
+			...props,
 			stackName: "s3Stack",
 		});
 		const sqsStack = new SqsStack(this);

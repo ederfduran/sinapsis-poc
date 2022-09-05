@@ -1,47 +1,23 @@
 # PoC: Thumbnail Generator API
 
-## Goal
+## Repo Organization
 
-Build a simple API that generates thumbnails from a source image
+- `/lib` : All our infrastructure defined with cdk and typescript
+- `/openapi` : Definitions of our api using openapi standard. this file is used for api gateway deployment.
+- `/src/auth` : Lambda authorizer, usined for authorization in api gateway. This lambda validates token against Auth0 service.
+- `/src/lambdas/api` : That is the place where api handlers code is located.
+- `/src/lambdas/async` : There is a place for lambda that is usually triggered in async event. In this case is the lambda that is triggered by sqs to process the image.
+- `/src/layers` : Pieces of reusable code used by lambdas.
+- `/test` : This is where all tests are stored.
+- `Dockerfile` : This file is used to create the lambda to process image files.
 
-## Requirements
+## Requirements | Stack
 
-- The API should provide at least 1 endpoint where the user will be able to POST the original image
-- The API must **ONLY** accept PNG and JPEG files
-- The API must reject input file bigger than **5mb**
-- The API should give the user 3 new images with the following dimensions
-  - 400x300
-  - 160x120
-  - 120x120
-
-## Grading Guidelines
-
-### MVP (40 points)
-
-- Every requirement is met
-- The solution runs on our enviroment
-- Tech Stack: Node.js >=8 / Python 3
-- Any ENV specific value should be configurable and documented
-- Everything should work after following a simple README
-- The code should be clear and easy to read / debug
-
-### Nice moves (5 points each)
-
-- It includes **RAML** or **Swagger** documentation
-- It includes configuration files / scripts for deploying it on **AWS** or **GCP**
-- It's serverless! (either **AWS Lambda + API Gateway** or **GCP Cloud Functions**)
-- It relies on **Serverless Framework** or **SAM**
-- It's Dockerized for local development / testing
-- It leverages cloud services (ie: AWS S3, SNS, SQS, etc...)
-- It's asynchronic
-- It's fast (<~500ms after upload finishes)
-- It includes some kind of testing (unit tests, integration tests, etc) with at least 70% coverage
-- It has an auth implementation (recommended: Auth0)
-
-### Wait, WHAT?! (10 points each)
-
-- It includes a configuration file / script to setup a CI/CD process on AWS or GCP
-- It includes three different kinds of tests (unit, integration and performance)
+- CDKv2
+- Typescript
+- Nodejs
+- Docker
+- Jest
 
 ## Special requirements
 
@@ -62,4 +38,4 @@ In order to use `aws-cdk-lib/aws-lambda-nodejs` for bundling and transpiling you
 
 ## Persistence layer
 
-For pesist the data we are going to use dynamo db with a table called thumbnail requests where partition key will be a request id generated. Besides that we plan to storage information of request status, last download and instert date.
+For pesist the data we are going to use dynamo db with a table called thumbnail requests where partition key will be a request id generated. Besides that we plan to storage information of request status, insert date, modified date and thumbnail public urls when the image processing has finished.
