@@ -23,6 +23,11 @@ export async function handler(
 			requestId
 		);
 		console.log(thumbnailRequest);
+		if (!thumbnailRequest) {
+			return Responses.NOT_FOUND({
+				message: "Invalid thumbnail request id",
+			});
+		}
 		return Responses.OK({
 			thumbnailRequest,
 		});

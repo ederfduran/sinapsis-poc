@@ -68,6 +68,19 @@ describe("Unit test for thumbnail-generation handler", function () {
 		);
 	});
 
+	it("Fails with invalid file name", async () => {
+		const event: APIGatewayProxyEvent = {
+			body: JSON.stringify({
+				image: "BASE64 Encoded Image",
+				mime: "image/jpeg",
+				name: "áêīòü.jpeg",
+			}),
+		} as any;
+		const response = await handler(event);
+		expect(response.statusCode).toEqual(400);
+		expect(JSON.parse(response.body).message).toEqual("invalid file name");
+	});
+
 	it("Fails with empty body", async () => {
 		const event: APIGatewayProxyEvent = {
 			body: "",
@@ -80,8 +93,8 @@ describe("Unit test for thumbnail-generation handler", function () {
 	it("Fails with bad image format", async () => {
 		const event: APIGatewayProxyEvent = {
 			body: JSON.stringify({
-				mime: "image/jpeg",
-				name: "mockeImageName.jpeg",
+				mime: "image/tiff",
+				name: "mockeImageName.tiff",
 			}),
 		} as any;
 		const response = await handler(event);

@@ -4,7 +4,7 @@ module.exports = {
 	coverageDirectory: "coverage",
 	coverageProvider: "v8",
 	testEnvironment: "node",
-	roots: ["<rootDir>/test"],
+	roots: ["<rootDir>/test/unit"],
 	testMatch: ["**/*.test.ts"],
 	transform: {
 		"^.+\\.tsx?$": "ts-jest",

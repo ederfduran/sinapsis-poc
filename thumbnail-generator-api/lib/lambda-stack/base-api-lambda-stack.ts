@@ -39,6 +39,11 @@ export class BaseApiLambdaFunction extends NodejsFunction {
 		// Override logical Id to reference correctly on OpenAPI
 		const cfnLambda = this.node.defaultChild as CfnFunction;
 		cfnLambda.overrideLogicalId(id);
+
+		// output function name
+		new cdk.CfnOutput(scope, `${props.functionName}Name`, {
+			value: props.functionName!,
+		});
 	}
 
 	public grantApiPermission() {

@@ -9,6 +9,10 @@ export async function handler(event: SQSEvent) {
 	console.log(event);
 	for (const record of event.Records) {
 		const thumbnailRequest = JSON.parse(record.body) as IThumbnailRequest;
+		// ignore test messages
+		if (thumbnailRequest.storageLocation.includes("test")) {
+			continue;
+		}
 		try {
 			console.log("InProgress");
 			await thumbnailRequestDAO.updateThumbnailRequest(

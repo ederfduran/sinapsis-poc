@@ -1,4 +1,5 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
+import { Error } from "aws-sdk/clients/ses";
 import {
 	handler,
 	thumbnailRequestDAO,
@@ -53,13 +54,13 @@ describe("Unit test for thumbnail-gen status handler", function () {
 				requestId: "1",
 			},
 		} as any;
-		const mockfn = jest.fn().mockRejectedValue(new Error(mockError));
+		const error = new Error(mockError);
+		const mockfn = jest.fn().mockRejectedValue(error);
 		jest
 			.spyOn(thumbnailRequestDAO, "getThumbnailRequest")
 			.mockImplementation(mockfn);
 		const result = await handler(event);
-		expect(mockfn).rejects.toBe(mockError);
-		console.log(result);
+		expect(mockfn).rejects.toBe(error);
 		expect(result.statusCode).toEqual(500);
 	});
 });

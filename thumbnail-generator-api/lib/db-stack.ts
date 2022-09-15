@@ -17,5 +17,9 @@ export class DbStack extends cdk.Stack {
 			// Not recomended for prod
 			removalPolicy: cdk.RemovalPolicy.DESTROY,
 		});
+
+		new cdk.CfnOutput(this, "thumbnailRequestTableName", {
+			value: this.thumbnailRequestTable.tableName,
+		});
 	}
 }

@@ -8,6 +8,7 @@
 		"build": "tsc",
 		"watch": "tsc -w",
 		"test": "jest",
+		"integration-test": "jest --config jest.integration.config.js --runInBand",
 		"cdk": "cdk"
 	},
 	"devDependencies": {
@@ -20,6 +21,7 @@
 		"@types/prettier": "2.6.0",
 		"aws-cdk": "2.38.1",
 		"babel-jest": "^29.0.2",
+		"dotenv": "^5.0.1",
 		"esbuild": "^0.15.6",
 		"jest": "^27.5.1",
 		"ts-jest": "^27.1.4",
@@ -28,7 +30,9 @@
 	},
 	"dependencies": {
 		"@aws-sdk/client-dynamodb": "^3.162.0",
+		"@aws-sdk/client-lambda": "^3.171.0",
 		"@aws-sdk/client-s3": "^3.163.0",
+		"@aws-sdk/lib-dynamodb": "^3.170.0",
 		"aws-cdk-lib": "2.38.1",
 		"aws-sdk": "^2.1205.0",
 		"constructs": "^10.0.0",

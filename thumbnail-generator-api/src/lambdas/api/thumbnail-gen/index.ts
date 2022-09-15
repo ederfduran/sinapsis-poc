@@ -9,8 +9,17 @@ import {
 } from "/opt/nodejs/thumbnail-request";
 import { ThumbnailRequestDAO } from "/opt/nodejs/thumbnail-request-dao";
 
-const allowedMimes = ["image/jpeg", "image/png"];
+const allowedMimes = ["image/jpeg", "image/jpg", "image/png"];
+const SAFE_CHARACTERS: RegExp = /[^0-9a-zA-Z! _\\.\\*'\\(\\)\\\-/]/g;
 export const thumbnailRequestDAO = new ThumbnailRequestDAO();
+
+const readBody = (body: any) => {
+	try {
+		return JSON.parse(body);
+	} catch (e) {
+		return body;
+	}
+};
 
 export async function handler(
 	event: APIGatewayProxyEvent
@@ -19,7 +28,7 @@ export async function handler(
 		if (!event.body) {
 			return Responses.BAD_REQUEST({ message: "empty body error" });
 		}
-		const body = JSON.parse(event.body);
+		let body = readBody(event.body);
 		if (!body || !body.image || !body.mime) {
 			return Responses.BAD_REQUEST({ message: "incorrect body on request" });
 		}
@@ -29,6 +38,14 @@ export async function handler(
 				message: "file extension is not allowed",
 			});
 		}
+
+		// TODO: Sanitize body.name
+		if (SAFE_CHARACTERS.test(body.name)) {
+			return Responses.BAD_REQUEST({
+				message: "invalid file name",
+			});
+		}
+
 		const requestId = uuid();
 		const objectKey = await loadImageToS3(body, requestId);
 		const thumbnailRequest: IThumbnailRequest = {

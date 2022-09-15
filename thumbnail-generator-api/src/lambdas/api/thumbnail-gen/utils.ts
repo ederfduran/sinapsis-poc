@@ -17,9 +17,10 @@ export const loadImageToS3 = async (body: any, requestId: string) => {
 	const detectedMime = fileInfo!.mime;
 
 	if (detectedMime !== body.mime) {
-		throw new Error("inconsistent file extension");
+		throw new Error(
+			`inconsistent file extension, detected ${detectedMime}, current ${body.mime}`
+		);
 	}
-
 	const key = `images/${requestId}/${body.name}`;
 	await s3
 		.upload({
