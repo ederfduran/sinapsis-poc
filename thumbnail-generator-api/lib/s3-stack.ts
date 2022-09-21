@@ -6,14 +6,20 @@ import {
 	BlockPublicAccess,
 } from "aws-cdk-lib/aws-s3";
 import { Construct } from "constructs";
+import { CDKContext } from "../types";
 
 export class S3BucketStack extends cdk.Stack {
 	thumbnailBucket: Bucket;
 
-	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+	constructor(
+		scope: Construct,
+		id: string,
+		props: cdk.StackProps,
+		context: CDKContext
+	) {
 		super(scope, id, props);
-		this.thumbnailBucket = new Bucket(scope, "sinapsis-thumbnail-bucket", {
-			bucketName: "sinapsis-thumbnail-bucket",
+		this.thumbnailBucket = new Bucket(this, "sinapsis-thumbnail-bucket", {
+			bucketName: `sinapsis-thumbnail-bucket-${context.environment}`,
 			blockPublicAccess: {
 				blockPublicAcls: true,
 				ignorePublicAcls: true,

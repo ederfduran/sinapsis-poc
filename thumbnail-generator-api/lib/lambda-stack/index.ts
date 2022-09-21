@@ -9,6 +9,7 @@ import {
 	DockerImageFunction,
 	DockerImageCode,
 	CfnFunction,
+	CfnPermission,
 } from "aws-cdk-lib/aws-lambda";
 import { Bucket } from "aws-cdk-lib/aws-s3";
 import { Queue } from "aws-cdk-lib/aws-sqs";
@@ -20,6 +21,7 @@ import {
 	NodejsFunction,
 	NodejsFunctionProps,
 } from "aws-cdk-lib/aws-lambda-nodejs";
+import { CDKContext } from "../../types";
 
 export class LambdaStack {
 	postThumbnailGen: BaseApiLambdaFunction;
@@ -33,7 +35,8 @@ export class LambdaStack {
 		scope: Construct,
 		thumbnailRequestTable: Table,
 		thumbnailBucket: Bucket,
-		thumbnailQueue: Queue
+		thumbnailQueue: Queue,
+		context: CDKContext
 	) {
 		this.stack = scope;
 		const commonLayer = new LayerVersion(this.stack, "common-dao-layer", {
@@ -54,12 +57,14 @@ export class LambdaStack {
 		this.createApiLambdas(
 			thumbnailRequestTable,
 			thumbnailBucket,
-			thumbnailQueue
+			thumbnailQueue,
+			context
 		);
 		this.createThumbnailGeneratorLambda(
 			thumbnailRequestTable,
 			thumbnailBucket,
-			thumbnailQueue
+			thumbnailQueue,
+			context
 		);
 		this.createAuthorizer();
 	}
@@ -67,7 +72,8 @@ export class LambdaStack {
 	private createThumbnailGeneratorLambda(
 		thumbnailRequestTable: Table,
 		thumbnailBucket: Bucket,
-		thumbnailQueue: Queue
+		thumbnailQueue: Queue,
+		context: CDKContext
 	) {
 		// Configure path to Dockerfile
 		const dockerfile = path.join(__dirname, "/../..");
@@ -78,7 +84,7 @@ export class LambdaStack {
 			"thumbnailGeneratorFunction",
 			{
 				code: DockerImageCode.fromImageAsset(dockerfile),
-				functionName: "thumbnailGeneratorFunction",
+				functionName: `thumbnailGeneratorFunction-${context.environment}`,
 				memorySize: 3008,
 				environment: {
 					QUEUE_URL: thumbnailQueue.queueUrl,
@@ -127,14 +133,15 @@ export class LambdaStack {
 	private createApiLambdas(
 		thumbnailRequestTable: Table,
 		thumbnailBucket: Bucket,
-		thumbnailQueue: Queue
+		thumbnailQueue: Queue,
+		context: CDKContext
 	) {
 		const apiRoot = "/../../src/lambdas/api";
 		this.postThumbnailGen = new BaseApiLambdaFunction(
 			this.stack,
 			"createThumbnailRequestFunction",
 			{
-				functionName: "createThumbnailRequestFunction",
+				functionName: `createThumbnailRequestFunction-${context.environment}`,
 				entry: path.join(__dirname, `${apiRoot}/thumbnail-gen/index.ts`),
 				layers: this.layers,
 				environment: {
@@ -159,7 +166,7 @@ export class LambdaStack {
 			this.stack,
 			"readThumbnailRequestStatusFunction",
 			{
-				functionName: "readThumbnailRequestStatusFunction",
+				functionName: `readThumbnailRequestStatusFunction-${context.environment}`,
 				entry: path.join(__dirname, `${apiRoot}/thumbnail-gen-status/index.ts`),
 				layers: this.layers,
 			},
@@ -184,5 +191,11 @@ export class LambdaStack {
 		// Override logical Id to reference correctly on OpenAPI
 		const cfnLambda = this.authorizer.node.defaultChild as CfnFunction;
 		cfnLambda.overrideLogicalId(authorizerId);
+		// Add invoke permission
+		new CfnPermission(this.stack, `invoke-permission-authorizer`, {
+			action: "lambda:InvokeFunction",
+			principal: "apigateway.amazonaws.com",
+			functionName: this.authorizer.functionName,
+		});
 	}
 }

@@ -15,6 +15,7 @@ import { Function as LambdaFunction } from "aws-cdk-lib/aws-lambda";
 import { Asset } from "aws-cdk-lib/aws-s3-assets";
 import { Construct } from "constructs";
 import * as path from "path";
+import { CDKContext } from "../types";
 
 export class ApiGatewayStack {
 	static DEFAULT_STAGE: string = "live";
@@ -24,7 +25,8 @@ export class ApiGatewayStack {
 	constructor(
 		scope: Construct,
 		thumbnailGen: LambdaFunction,
-		thumbnailGenStatus: LambdaFunction
+		thumbnailGenStatus: LambdaFunction,
+		context: CDKContext
 	) {
 		this.stack = scope;
 
@@ -38,7 +40,7 @@ export class ApiGatewayStack {
 
 		this.api_ = new SpecRestApi(this.stack, "thumbnails-gen-api", {
 			apiDefinition: apiDefinition,
-			restApiName: "thumbnails-gen-api",
+			restApiName: `thumbnails-gen-api-${context.environment}`,
 			endpointTypes: [EndpointType.REGIONAL],
 			deployOptions: {
 				stageName: ApiGatewayStack.DEFAULT_STAGE,
